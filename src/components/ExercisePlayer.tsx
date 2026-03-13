@@ -5,7 +5,7 @@
  * PitchDisplay, and control buttons (start, stop, tone mute, back).
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { Exercise } from '../data/exercises';
 import { midiToNoteName } from '../utils/note-utils';
 import { AudioEngine } from '../audio/audio-engine';
@@ -14,6 +14,9 @@ import { useExerciseRunner } from '../hooks/useExerciseRunner';
 import { ExerciseCanvas } from './ExerciseCanvas';
 import { PitchDisplay } from './PitchDisplay';
 import { ExerciseScore } from './ExerciseScore';
+
+// Natural-note pitch classes (no sharps/flats) for the starting-note picker
+const NATURAL_PCS = [0, 2, 4, 5, 7, 9, 11];
 
 interface Props {
   exercise: Exercise;
@@ -36,6 +39,24 @@ export function ExercisePlayer({
   });
   const [micError, setMicError] = useState<string | null>(null);
   const [micRunning, setMicRunning] = useState(false);
+  const [localStartMidi, setLocalStartMidi] = useState(startMidi);
+
+  // Sync local state when the prop changes (e.g. switching exercises via "Next")
+  useEffect(() => {
+    setLocalStartMidi(startMidi);
+  }, [startMidi]);
+
+  // Build the list of selectable starting notes for this exercise
+  const startNoteOptions = useMemo(() => {
+    const { minMidi, maxMidi } = exercise.startRange;
+    const notes: number[] = [];
+    for (let midi = minMidi; midi <= maxMidi; midi++) {
+      if (NATURAL_PCS.includes(midi % 12)) {
+        notes.push(midi);
+      }
+    }
+    return notes;
+  }, [exercise.startRange]);
 
   const engineRef = useRef<AudioEngine | null>(null);
   const runner = useExerciseRunner(exercise);
@@ -86,8 +107,8 @@ export function ExercisePlayer({
     if (!micRunning) {
       await startMic();
     }
-    runner.start(startMidi);
-  }, [micRunning, startMic, runner, startMidi]);
+    runner.start(localStartMidi);
+  }, [micRunning, startMic, runner, localStartMidi]);
 
   // Stop exercise
   const handleStop = useCallback(() => {
@@ -96,8 +117,8 @@ export function ExercisePlayer({
 
   // Retry — restart same exercise with same start note
   const handleRetry = useCallback(() => {
-    runner.start(startMidi);
-  }, [runner, startMidi]);
+    runner.start(localStartMidi);
+  }, [runner, localStartMidi]);
 
   // Go to next exercise
   const handleNext = useCallback(
@@ -143,9 +164,28 @@ export function ExercisePlayer({
         <div className="exercise-player-info">
           <h2>{exercise.name}</h2>
           <span className="exercise-player-key">
-            Starting: {midiToNoteName(startMidi)}
-            {(isPlaying || isCountdown) && runner.totalRepetitions > 1 && (
-              <> &middot; Rep {runner.currentRepetition + 1} / {runner.totalRepetitions}</>
+            {isIdle ? (
+              <span className="start-note-picker">
+                <label htmlFor="player-start-note">Start:</label>
+                <select
+                  id="player-start-note"
+                  value={localStartMidi}
+                  onChange={(e) => setLocalStartMidi(Number(e.target.value))}
+                >
+                  {startNoteOptions.map((midi) => (
+                    <option key={midi} value={midi}>
+                      {midiToNoteName(midi)}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            ) : (
+              <>
+                Starting: {midiToNoteName(localStartMidi)}
+                {(isPlaying || isCountdown) && runner.totalRepetitions > 1 && (
+                  <> &middot; Rep {runner.currentRepetition + 1} / {runner.totalRepetitions}</>
+                )}
+              </>
             )}
           </span>
         </div>
