@@ -11,12 +11,18 @@ import { midiToNoteName } from '../utils/note-utils';
 import { AudioEngine } from '../audio/audio-engine';
 import type { PitchData } from '../audio/audio-engine';
 import { useExerciseRunner } from '../hooks/useExerciseRunner';
+import { useWakeLock } from '../hooks/useWakeLock';
 import { ExerciseCanvas } from './ExerciseCanvas';
 import { PitchDisplay } from './PitchDisplay';
 import { ExerciseScore } from './ExerciseScore';
 
 // Natural-note pitch classes (no sharps/flats) for the starting-note picker
 const NATURAL_PCS = [0, 2, 4, 5, 7, 9, 11];
+
+// Detect iOS for silent-mode hint (iPad reports as "MacIntel" with touch)
+const IS_IOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 interface Props {
   exercise: Exercise;
@@ -60,6 +66,9 @@ export function ExercisePlayer({
 
   const engineRef = useRef<AudioEngine | null>(null);
   const runner = useExerciseRunner(exercise);
+
+  // Keep screen awake during active exercise (playing or countdown)
+  useWakeLock(runner.state === 'playing' || runner.state === 'countdown');
 
   // Feed pitch data to the exercise runner
   const handlePitch = useCallback(
@@ -217,6 +226,11 @@ export function ExercisePlayer({
       {isIdle && (
         <div className="exercise-instruction">
           <p>{exercise.instruction}</p>
+          {IS_IOS && (
+            <p style={{ marginTop: 8, fontSize: '0.8rem', color: 'var(--yellow)' }}>
+              Make sure Silent Mode is off (flip the side switch) to hear reference tones.
+            </p>
+          )}
         </div>
       )}
 

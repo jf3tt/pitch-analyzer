@@ -48,6 +48,10 @@ export class ToneGenerator {
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
     }
+    // iOS Safari: resume suspended context (must be called from user gesture call stack)
+    if (this.audioContext.state === 'suspended') {
+      void this.audioContext.resume();
+    }
     return this.audioContext;
   }
 

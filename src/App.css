@@ -23,11 +23,14 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow: hidden;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -36,6 +39,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   padding: 16px;
   gap: 16px;
 }
@@ -149,7 +153,7 @@ body {
 
 /* Cents bar indicator */
 .cents-bar {
-  width: 280px;
+  width: min(280px, 100%);
   margin-top: 8px;
 }
 
@@ -356,7 +360,7 @@ body {
 /* Exercise card grid */
 .exercise-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 12px;
 }
 
@@ -506,7 +510,7 @@ body {
 }
 
 .exercise-player .cents-bar {
-  width: 200px;
+  width: min(200px, 100%);
 }
 
 /* Real-time accuracy bar */
@@ -736,4 +740,228 @@ body {
 .score-actions .btn-toggle {
   padding: 8px 20px;
   font-size: 0.9rem;
+}
+
+/* ============================================================
+   Tablet breakpoint (≤ 1024px)
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .app {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .exercise-grid {
+    gap: 10px;
+  }
+
+  .score-circle {
+    width: 110px;
+    height: 110px;
+  }
+
+  .score-number {
+    font-size: 2.4rem;
+  }
+}
+
+/* ============================================================
+   Mobile breakpoint (≤ 600px)
+   ============================================================ */
+
+@media (max-width: 600px) {
+  .app {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  /* Header — wrap onto multiple lines */
+  .app-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .app-header h1 {
+    font-size: 1.15rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Pitch display */
+  .pitch-note {
+    font-size: 3rem;
+  }
+
+  .pitch-display {
+    padding: 10px 0;
+  }
+
+  /* Canvas */
+  .canvas-container {
+    min-height: 150px;
+    border-radius: 8px;
+  }
+
+  /* Exercise list filters — stack vertically */
+  .exercise-list-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .difficulty-tabs {
+    justify-content: center;
+  }
+
+  .start-note-picker {
+    justify-content: center;
+  }
+
+  /* Exercise cards */
+  .exercise-card {
+    padding: 12px;
+  }
+
+  /* Exercise player header — stack */
+  .exercise-player-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .exercise-player-info {
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    order: -1;
+    width: 100%;
+  }
+
+  .exercise-player-info h2 {
+    font-size: 1rem;
+  }
+
+  .exercise-player-controls {
+    margin-left: auto;
+  }
+
+  /* Compact pitch display in exercise mode */
+  .exercise-player .pitch-display {
+    height: 80px;
+    min-height: 80px;
+    max-height: 80px;
+    padding: 4px 0;
+  }
+
+  .exercise-player .pitch-note {
+    font-size: 1.6rem;
+  }
+
+  .exercise-instruction {
+    padding: 10px 12px;
+  }
+
+  .exercise-instruction p {
+    font-size: 0.8rem;
+  }
+
+  /* Countdown */
+  .countdown-number {
+    font-size: 5rem;
+  }
+
+  /* Score screen */
+  .exercise-score {
+    gap: 16px;
+  }
+
+  .score-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .score-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .score-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .score-number {
+    font-size: 2.2rem;
+  }
+
+  .score-verdict {
+    font-size: 1rem;
+  }
+
+  .score-note-row {
+    gap: 6px;
+  }
+
+  .score-note-name {
+    font-size: 0.8rem;
+    min-width: 34px;
+  }
+
+  .score-note-syllable {
+    display: none;
+  }
+
+  .score-note-cents {
+    min-width: 40px;
+    font-size: 0.7rem;
+  }
+
+  .score-actions {
+    justify-content: center;
+  }
+
+  .score-actions .btn-toggle {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+
+/* ============================================================
+   Touch targets — ensure minimum 44px tap area
+   ============================================================ */
+
+@media (pointer: coarse) {
+  .mode-btn {
+    padding: 10px 18px;
+    min-height: 44px;
+  }
+
+  .btn-back {
+    padding: 10px 14px;
+    min-height: 44px;
+  }
+
+  .btn-tone {
+    padding: 10px 14px;
+    min-height: 44px;
+  }
+
+  .tab-btn {
+    padding: 10px 14px;
+    min-height: 44px;
+  }
+
+  .start-note-picker select {
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  .btn-toggle {
+    padding: 10px 24px;
+    min-height: 44px;
+  }
+
+  .exercise-card {
+    padding: 14px;
+  }
 }

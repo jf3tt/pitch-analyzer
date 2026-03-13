@@ -59,6 +59,12 @@ export class AudioEngine {
     });
 
     this.audioContext = new AudioContext();
+
+    // iOS Safari creates AudioContext in "suspended" state — resume it
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+
     this.sourceNode = this.audioContext.createMediaStreamSource(this.stream);
 
     // Try AudioWorklet, fall back to ScriptProcessor if unavailable
